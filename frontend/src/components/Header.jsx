@@ -29,18 +29,29 @@ export default function Header() {
   const handleSignout = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/user/signout`, {
-        method: 'POST',
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      const data = await res.json();
+  
+      // Check if the response is OK
       if (!res.ok) {
-        console.log(data.message);
-      } else {
-        dispatch(signoutSuccess());
+        const errorData = await res.text(); // Handle non-JSON error responses
+        console.log("Error during signout:", errorData);
+        return;
       }
+  
+      const data = await res.json();
+      dispatch(signoutSuccess());
+      console.log("Signout successful:", data.message);
+  
     } catch (error) {
-      console.log(error.message);
+      console.log("Network error during signout:", error.message);
     }
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();

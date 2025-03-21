@@ -61,29 +61,45 @@ export default function CreatePost() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     try {
-      const res = await fetch(`${API_BASE_URL}/api/post/create`, {
+      // Retrieve the token from cookies or localStorage
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('access_token='))
+        ?.split('=')[1] || localStorage.getItem('access_token');
+  
+      if (!token) {
+        setPublishError('Authorization token is missing. Please log in.');
+        return;
+      }
+  
+      const res = await fetch("https://blogsapp-4vyo.onrender.com/api/post/create", {
         method: 'POST',
-        credentials:'include',
+        credentials: 'include',  // Ensure cookies are sent
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Include the token if needed
         },
         body: JSON.stringify(formData),
       });
-      const data = await res.json();
+  
       if (!res.ok) {
-        setPublishError(data.message);
+        const errorData = await res.json();
+        setPublishError(errorData.message || 'Failed to create the post.');
         return;
       }
-
-      if (res.ok) {
-        setPublishError(null);
-        navigate(`/post/${data.slug}`);
-      }
+  
+      const data = await res.json();
+      setPublishError(null);  // Clear any existing errors
+      navigate(`/post/${data.slug}`);  // Redirect to the new post
+  
     } catch (error) {
-      setPublishError('Something went wrong');
+      setPublishError('Something went wrong. Please try again.');
+      console.error('Error creating post:', error.message);
     }
   };
+  
   return (
     <div className='p-3 max-w-3xl mx-auto min-h-screen'>
       <h1 className='text-center text-3xl my-7 font-semibold'>Create a post</h1>
