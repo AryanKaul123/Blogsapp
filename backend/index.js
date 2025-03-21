@@ -28,7 +28,7 @@ const __dirname = path.resolve();
 // ✅ CORS Configuration (Local + Deployed)
 app.use(
   cors({
-    origin: ["http://localhost:5173", process.env.CLIENT_URL],  // Local and deployed URL
+    origin: ["https://blogsapp-1-k1ti.onrender.com", process.env.CLIENT_URL],  // Local and deployed URL
     credentials: true,  // Allow cookies
   })
 );
