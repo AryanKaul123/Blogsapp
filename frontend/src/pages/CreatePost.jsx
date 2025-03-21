@@ -63,44 +63,33 @@ export default function CreatePost() {
     e.preventDefault();
   
     try {
-      // Retrieve the token from cookies or localStorage
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('access_token='))
-        ?.split('=')[1] || localStorage.getItem('access_token');
-  
-      if (!token) {
-        setPublishError('Authorization token is missing. Please log in.');
-        return;
-      }
-  
-      const res = await fetch("https://blogsapp-4vyo.onrender.com/api/post/create", {
+      const res = await fetch(`${API_BASE_URL}/api/post/create`, {
         method: 'POST',
-        credentials: 'include',  // Ensure cookies are sent
+        credentials: 'include',  // This is important for cookies
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Include the token if needed
+          'Authorization': `Bearer ${document.cookie.split('access_token=')[1]}`, // Ensure token is sent
         },
         body: JSON.stringify(formData),
       });
   
+      const data = await res.json();
+      console.log('Response Data:', data);
+  
       if (!res.ok) {
-        const errorData = await res.json();
-        setPublishError(errorData.message || 'Failed to create the post.');
+        setPublishError(data.message || 'Failed to create post');
         return;
       }
   
-      const data = await res.json();
-      console.log(data);
-      
-      setPublishError(null);  // Clear any existing errors
-      navigate(`/post/${data.slug}`);  // Redirect to the new post
-  
+      // If successful, navigate to the created post
+      setPublishError(null);
+      navigate(`/post/${data.slug}`);
     } catch (error) {
-      setPublishError('Something went wrong. Please try again.');
-      console.error('Error creating post:', error.message);
+      setPublishError('Something went wrong');
+      console.error('Error:', error);
     }
   };
+  
   
   return (
     <div className='p-3 max-w-3xl mx-auto min-h-screen'>
