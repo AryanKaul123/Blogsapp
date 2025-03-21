@@ -25,26 +25,23 @@ mongoose
 // ✅ Get the directory name for static files
 const __dirname = path.resolve();
 
-// ✅ Enable CORS for frontend (both local and deployed)
+// ✅ CORS Configuration (Local + Deployed)
 app.use(
   cors({
-    origin: 
-      "http://localhost:5173",  // Local development
-        // Update with your deployed frontend URL
-    
+    origin: ["http://localhost:5173", process.env.CLIENT_URL],  // Local and deployed URL
     credentials: true,  // Allow cookies
-   
   })
 );
 
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Set security headers
+// ✅ Set Security Headers
 app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');  // Critical for cookies
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
@@ -56,7 +53,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 
-// ✅ Serve static frontend files
+// ✅ Serve Static Frontend Files
 app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 app.get('*', (req, res) => {
@@ -65,6 +62,7 @@ app.get('*', (req, res) => {
 
 // ✅ Global Error Handling Middleware
 app.use((err, req, res, next) => {
+  console.error('⚠️ Error:', err.message);  // Better error logging
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   res.status(statusCode).json({
@@ -74,8 +72,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ Dynamic port handling for Render deployment
-const PORT = 3000;
+// ✅ Dynamic Port Handling for Render Deployment
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
