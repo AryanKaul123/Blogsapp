@@ -28,10 +28,10 @@ const __dirname = path.resolve();
 // ✅ Enable CORS for frontend (both local and deployed)
 app.use(
   cors({
-    origin: [
+    origin: 
       "http://localhost:5173",  // Local development
-      "https://your-frontend-on-render.com"  // Update with your deployed frontend URL
-    ],
+        // Update with your deployed frontend URL
+    
     credentials: true,  // Allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
