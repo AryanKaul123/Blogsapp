@@ -10,48 +10,44 @@ import path from 'path';
 import cors from 'cors';
 
 dotenv.config();
-
-mongoose
-  .connect(process.env.MONGO)
-  .then(() => {
-    console.log('MongoDB is connected');
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-const __dirname = path.resolve();
-
 const app = express();
 
-// ✅ Enable CORS for frontend requests
+// ✅ Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('✅ MongoDB connected successfully');
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err);
+  });
 
+// ✅ Get the directory name for static files
+const __dirname = path.resolve();
 
+// ✅ Enable CORS for frontend (both local and deployed)
 app.use(
   cors({
-    origin: "http://localhost:5173", // Allow frontend URL
-    credentials: true, // Allow cookies if using authentication
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+    origin: [
+      "http://localhost:5173",  // Local development
+      "https://your-frontend-on-render.com"  // Update with your deployed frontend URL
+    ],
+    credentials: true,  // Allow cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 
 app.use(express.json());
 app.use(cookieParser());
 
 // ✅ Set security headers
 app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups'); // Fix Firebase popup issue
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-
   next();
 });
 
@@ -62,7 +58,7 @@ app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 
 // ✅ Serve static frontend files
-app.use(express.static(path.join(__dirname, '/frontend/dist')));
+app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
@@ -79,7 +75,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ Start Server
-app.listen(3000, () => {
-  console.log('Server is running on port 3000!');
+// ✅ Dynamic port handling for Render deployment
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
