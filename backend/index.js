@@ -33,8 +33,7 @@ app.use(
         // Update with your deployed frontend URL
     
     credentials: true,  // Allow cookies
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+   
   })
 );
 

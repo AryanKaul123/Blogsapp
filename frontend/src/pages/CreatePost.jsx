@@ -91,6 +91,8 @@ export default function CreatePost() {
       }
   
       const data = await res.json();
+      console.log(data);
+      
       setPublishError(null);  // Clear any existing errors
       navigate(`/post/${data.slug}`);  // Redirect to the new post
   
@@ -169,7 +171,7 @@ export default function CreatePost() {
             setFormData({ ...formData, content: value });
           }}
         />
-        <Button type='submit' gradientDuoTone='purpleToPink'>
+        <Button type='submit' gradientDuoTone='purpleToPink' onClick={handleSubmit}>
           Publish
         </Button>
         {publishError && (
