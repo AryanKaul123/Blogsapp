@@ -63,9 +63,10 @@ export const signin = async (req, res, next) => {
     
 
     res.status(200).cookie('access_token', token, {
-        httpOnly: true,
-      })
-      .json(rest);
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',  // Secure cookie in production
+      sameSite: 'lax',  // Adjust to 'none' if using cross-origin
+    }).json(rest);
   } catch (error) {
     next(error);
   }
